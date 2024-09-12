@@ -49,8 +49,8 @@ public class AdminBizClient implements AdminBiz {
     }
 
     @Override
-    public ReturnT<String> registryTask(RegistryTaskParam param) {
-        return null;
+    public ReturnT<String> registryTask(RegistryTaskParam registryTaskParam) {
+        return XxlJobRemotingUtil.postBody(addressUrl + "api/registryTask", accessToken, timeout, registryTaskParam, String.class);
     }
 
 }

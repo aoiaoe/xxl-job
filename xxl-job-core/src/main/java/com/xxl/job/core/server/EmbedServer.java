@@ -3,6 +3,7 @@ package com.xxl.job.core.server;
 import com.xxl.job.core.biz.ExecutorBiz;
 import com.xxl.job.core.biz.impl.ExecutorBizImpl;
 import com.xxl.job.core.biz.model.*;
+import com.xxl.job.core.thread.ExecutorRegistryTaskThread;
 import com.xxl.job.core.thread.ExecutorRegistryThread;
 import com.xxl.job.core.util.GsonTool;
 import com.xxl.job.core.util.ThrowableUtil;
@@ -247,6 +248,7 @@ public class EmbedServer {
     public void startRegistry(final String appname, final String address) {
         // start registry
         ExecutorRegistryThread.getInstance().start(appname, address);
+        ExecutorRegistryTaskThread.getInstance().start(appname);
     }
 
     public void stopRegistry() {

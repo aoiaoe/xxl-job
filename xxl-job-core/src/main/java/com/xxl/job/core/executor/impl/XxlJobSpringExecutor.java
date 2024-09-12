@@ -1,5 +1,6 @@
 package com.xxl.job.core.executor.impl;
 
+import com.xxl.job.core.anno.JobTrigger;
 import com.xxl.job.core.executor.XxlJobExecutor;
 import com.xxl.job.core.glue.GlueFactory;
 import com.xxl.job.core.handler.annotation.XxlJob;
@@ -15,6 +16,9 @@ import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 
@@ -26,13 +30,12 @@ import java.util.Map;
 public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationContextAware, SmartInitializingSingleton, DisposableBean {
     private static final Logger logger = LoggerFactory.getLogger(XxlJobSpringExecutor.class);
 
+    // 待启动后注册的注解
+    public static List<JobTrigger> jobTriggers = new LinkedList<>();
 
     // start
     @Override
     public void afterSingletonsInstantiated() {
-
-        // init JobHandler Repository
-        /*initJobHandlerRepository(applicationContext);*/
 
         // init JobHandler Repository (for method)
         initJobHandlerMethodRepository(applicationContext);
@@ -53,29 +56,6 @@ public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationC
     public void destroy() {
         super.destroy();
     }
-
-
-    /*private void initJobHandlerRepository(ApplicationContext applicationContext) {
-        if (applicationContext == null) {
-            return;
-        }
-
-        // init job handler action
-        Map<String, Object> serviceBeanMap = applicationContext.getBeansWithAnnotation(JobHandler.class);
-
-        if (serviceBeanMap != null && serviceBeanMap.size() > 0) {
-            for (Object serviceBean : serviceBeanMap.values()) {
-                if (serviceBean instanceof IJobHandler) {
-                    String name = serviceBean.getClass().getAnnotation(JobHandler.class).value();
-                    IJobHandler handler = (IJobHandler) serviceBean;
-                    if (loadJobHandler(name) != null) {
-                        throw new RuntimeException("xxl-job jobhandler[" + name + "] naming conflicts.");
-                    }
-                    registJobHandler(name, handler);
-                }
-            }
-        }
-    }*/
 
     private void initJobHandlerMethodRepository(ApplicationContext applicationContext) {
         if (applicationContext == null) {
@@ -120,6 +100,23 @@ public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationC
                 registJobHandler(xxlJob, bean, executeMethod);
             }
 
+            // filter method
+            Map<Method, JobTrigger> jobTriggerMethodMap = null;   // referred to ：org.springframework.context.event.EventListenerMethodProcessor.processBean
+            try {
+                jobTriggerMethodMap = MethodIntrospector.selectMethods(bean.getClass(),
+                        new MethodIntrospector.MetadataLookup<JobTrigger>() {
+                            @Override
+                            public JobTrigger inspect(Method method) {
+                                return AnnotatedElementUtils.findMergedAnnotation(method, JobTrigger.class);
+                            }
+                        });
+            } catch (Throwable ex) {
+                logger.error("xxl-job method-jobhandler resolve error for bean[" + beanDefinitionName + "].", ex);
+            }
+            if (jobTriggerMethodMap== null || jobTriggerMethodMap.isEmpty()) {
+                continue;
+            }
+            jobTriggers.addAll(jobTriggerMethodMap.values());
         }
     }
 
@@ -134,14 +131,5 @@ public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationC
     public static ApplicationContext getApplicationContext() {
         return applicationContext;
     }
-
-    /*
-    BeanDefinitionRegistryPostProcessor
-    registry.getBeanDefine()
-    @Override
-    public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
-        this.registry = registry;
-    }
-    * */
 
 }
