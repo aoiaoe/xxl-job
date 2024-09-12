@@ -228,7 +228,13 @@
 		LIMIT #{pagesize}
 	</select>
 
-	<update id="scheduleUpdate" parameterType="com.xxl.job.admin.core.model.XxlJobInfo"  >
+    <select id="countExist" resultType="java.lang.Integer">
+		select count(1)
+		from xxl_job_info
+		where job_group = #{groupId} and job_desc = #{jobDesc}
+	</select>
+
+    <update id="scheduleUpdate" parameterType="com.xxl.job.admin.core.model.XxlJobInfo"  >
 		UPDATE xxl_job_info
 		SET
 			trigger_last_time = #{triggerLastTime},

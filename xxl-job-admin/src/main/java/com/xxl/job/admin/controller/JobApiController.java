@@ -5,6 +5,7 @@ import com.xxl.job.admin.core.conf.XxlJobAdminConfig;
 import com.xxl.job.core.biz.AdminBiz;
 import com.xxl.job.core.biz.model.HandleCallbackParam;
 import com.xxl.job.core.biz.model.RegistryParam;
+import com.xxl.job.core.biz.model.RegistryTaskParam;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.util.GsonTool;
 import com.xxl.job.core.util.XxlJobRemotingUtil;
@@ -63,6 +64,9 @@ public class JobApiController {
         } else if ("registryRemove".equals(uri)) {
             RegistryParam registryParam = GsonTool.fromJson(data, RegistryParam.class);
             return adminBiz.registryRemove(registryParam);
+        } else if ("registryTask".equals(uri)) {
+            RegistryTaskParam registryTaskParam = GsonTool.fromJson(data, RegistryTaskParam.class);
+            return adminBiz.registryTask(registryTaskParam);
         } else {
             return new ReturnT<String>(ReturnT.FAIL_CODE, "invalid request, uri-mapping("+ uri +") not found.");
         }

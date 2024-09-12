@@ -46,4 +46,5 @@ public interface XxlJobInfoDao {
 	public int scheduleUpdate(XxlJobInfo xxlJobInfo);
 
 
+    int countExist(@Param("groupId") int groupId, @Param("jobDesc") String jobDesc);
 }

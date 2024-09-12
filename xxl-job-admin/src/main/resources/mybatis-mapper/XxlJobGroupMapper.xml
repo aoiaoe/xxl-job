@@ -87,5 +87,12 @@
 			</if>
 		</trim>
 	</select>
+	<select id="findByAppName" resultMap="XxlJobGroup"
+			parameterType="java.lang.String">
+		select * from xxl_job_group
+		where app_name = #{jobGroupName}
+		order by id
+		limit 1
+	</select>
 
 </mapper>
